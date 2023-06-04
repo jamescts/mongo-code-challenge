@@ -7,7 +7,6 @@ class PaymentController {
 
   constructor(paymentGateway: PaymentGatewayAdapter) {
     this.paymentGateway = paymentGateway;
-    paymentGateway.pay(5000).then((v) => logger.debug(v));
   }
 
   public async pay(req: Request, res: Response): Promise<void> {
@@ -26,10 +25,10 @@ class PaymentController {
   }
 
   public async reimburse(req: Request, res: Response): Promise<void> {
-    const { value } = req.body;
+    const { transactionId } = req.params;
     try {
-      const result = await this.paymentGateway.reimburse(value);
-      res.json({ actionRequested: 'reimbursement', result });
+      const result = await this.paymentGateway.reimburse(transactionId);
+      res.json({ actionRequested: 'reimbursement', transactionId, result });
     } catch (error: any) {
       logger.error(error.message);
       res

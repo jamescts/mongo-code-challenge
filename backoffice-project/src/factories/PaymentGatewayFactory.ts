@@ -2,6 +2,7 @@ import config from '../config';
 import logger from '../logger/winston';
 import PaypalGatewayService from '../services/PaypalGatewayService';
 import StripeGatewayService from '../services/StripeGatewayService';
+import { PaymentGateway } from '../interfaces/PaymentGateway';
 
 class PaymentGatewayFactory { // Factory class to generate PaymentGateways.
   public createPaymentGateway(gatewayId: string): PaymentGateway {

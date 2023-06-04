@@ -18,5 +18,21 @@ So taking all of this into account, we can finally start to flesh out the archit
 
 ## Architecture
 
-Our project will be structured as web-server implemented in Typescript using the Express framework. We will use the customary controller-service interface and expose a payments API under the /api/payments route. Payment gateways will conform to our PaymentGateway interface, instantiated in run-time through a PaymentGatewayFactory and called with a PaymentGatewayAdapter. With all of these in mind, it's time to get coding!
+Our project will be structured as web-server implemented in Typescript using the Express framework. We will use the customary controller-service interface and expose a payments API under the /api/payments route. Payment gateways will conform to our PaymentGateway interface, instantiated in run-time through a PaymentGatewayFactory and called with a PaymentGatewayAdapter. 
+We will expose an /api/payments route on which we will mount an additional route for each of our gateways. So for this basic example, we will have:
+- /api/payments/paypal
+- /api/payments/stripe
+
+Under these routes we will have a /pay endpoint, which will be a POST endpoint with a body that specifies the value to pay, and which returns a transactionId, and a /{transactionId}/reimburse endpoint which will be a GET endpoint that reimburses the transactionId in the parameter. For this example we will not be coding any real underlying logic. /pay will return a random UUID and the value we sent, and /reimburse will return true in Paypal's case, and false in Stripe's case, along with the transactionId we sent and the operation requested.
+
+With all of these in mind, it's time to get coding!
+
+## Next steps
+
+This is a very simple project, which hopefully has a solid enough design to be able to be scaled up. Some possible next steps to expand on it:
+- Introduce logic in our payment gateways so they actually communicate with our payment providers.
+- Introduce a database to save transactions and their state, so we can query on them. Include a query route so we can consult the state of transactions.
+- Introduce Event Emitters in our payment provider implementation, so we can listen for events to track the state of transactions and notify the important stakeholders in a decoupled manner.
+- Add a config database to hold important values, and further parameterize our way of adding routes and controllers so every controller dynamically mounts its routes.
+- Add a provider management endpoint so we can enable or disable payment providers without a reset. The way we have designed our application should make this easy to do.
 

@@ -38,8 +38,8 @@ controllerArray.forEach((entry) => {
     `/${entry.endpoint}/pay`,
     entry.controller.pay.bind(entry.controller),
   );
-  router.post(
-    `/${entry.endpoint}/reimburse`,
+  router.get(
+    `/${entry.endpoint}/:transactionId/reimburse`,
     entry.controller.reimburse.bind(entry.controller),
   );
 });

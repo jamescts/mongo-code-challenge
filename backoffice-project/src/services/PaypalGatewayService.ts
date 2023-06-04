@@ -1,9 +1,11 @@
+import { v4 } from 'uuid';
 import { PaymentGateway } from '../interfaces/PaymentGateway';
 
 class PaypalGatewayService implements PaymentGateway {
   public async pay(value: number): Promise<string> {
     // logic to communicate with Paypal API
-    return '80f235fc-c757-4703-bcd4-d7576c8e22f1';
+    const uuid = v4();
+    return 'uuid';
   }
 
   public async reimburse(transactionId: string): Promise<boolean> {
