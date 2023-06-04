@@ -37,7 +37,6 @@ Our folder structure then will look something like this:
   - routes // exposed endpoints
   - services // implementation of gateway providers
   index.ts // application entry point
-  ...
 ```
 
 With all of these in mind, it's time to get coding!
