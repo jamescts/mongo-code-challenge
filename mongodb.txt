@@ -1,5 +1,5 @@
-** Ejercicio 1 **
-
+** Exercise 1 **
+Query:
 [
   {
     $match: // Query to get all the pokemon which have 1+ evolutions and no pre evolutions (or for example someone like Venusaur would appear twice).
@@ -81,9 +81,9 @@
   },
 ]
 
-** Ejercicio 2 **
+** Exercise 2 **
 
-Resultado:
+Query:
 [
   {
     $match: // We match every pokemon that is the first of their line (no prev evos and has a next evo)
@@ -329,4 +329,4 @@ Knowing this, we do not need two lookup stages; rather, we can simply match ever
   },
 ]
 
-This aggregation only requires 6 stages (to the previous 11), and according to DBCompass Explain feature, executes in less than 10ms to the other aggregation's 30 to 40ms, which could become a big performance increase in larger databases. Of course, it is important to bear in mind this version would not work in a dataset with 4 Pokemon long evolutionary lines.
+This aggregation only requires 6 stages (to the previous 11), and, according to DBCompass Explain feature, executes in less than 10ms to the other aggregation's 30 to 40ms, which could become a big performance increase in larger databases. Of course, it is important to bear in mind this version would not work in a dataset with 4 Pokemon long evolutionary lines.

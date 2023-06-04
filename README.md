@@ -5,6 +5,12 @@ This repository contains the files for two challenges: a query challenge over a 
 
 ## Mongo challenge
 The answer to the Mongo challenges can be found in the mongodb.txt file. There is also a Mongo dump in the mongo-dump folder since the database used for this was a different one than the one originally proposed, since I wasn't able to connect to that one.
+To get it up and running we simply need to 
+```bash
+cd mongo-dump
+mongorestore
+```
+Then connect to the database with our preferred application or mongosh.
 
 ## Coding challenge
 The coding challenge can be found in the backoffice-project folder. To get it up and running:

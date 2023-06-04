@@ -25,13 +25,28 @@ We will expose an /api/payments route on which we will mount an additional route
 
 Under these routes we will have a /pay endpoint, which will be a POST endpoint with a body that specifies the value to pay, and which returns a transactionId, and a /{transactionId}/reimburse endpoint which will be a GET endpoint that reimburses the transactionId in the parameter. For this example we will not be coding any real underlying logic. /pay will return a random UUID and the value we sent, and /reimburse will return true in Paypal's case, and false in Stripe's case, along with the transactionId we sent and the operation requested.
 
+Our folder structure then will look something like this:
+```
+- src
+  - adapters 
+  - config // configuration values 
+  - controllers 
+  - factories 
+  - interfaces // typescript interfaces
+  - logger
+  - routes // exposed endpoints
+  - services // implementation of gateway providers
+  index.ts // application entry point
+  ...
+```
+
 With all of these in mind, it's time to get coding!
 
 ## Next steps
 
 This is a very simple project, which hopefully has a solid enough design to be able to be scaled up. Some possible next steps to expand on it:
 - Introduce logic in our payment gateways so they actually communicate with our payment providers.
-- Introduce a database to save transactions and their state, so we can query on them. Include a query route so we can consult the state of transactions.
+- Introduce a database to save transactions and their state, so we can run queries on them. Include a /transactions route so we can consult the state of transactions.
 - Introduce Event Emitters in our payment provider implementation, so we can listen for events to track the state of transactions and notify the important stakeholders in a decoupled manner.
 - Add a config database to hold important values, and further parameterize our way of adding routes and controllers so every controller dynamically mounts its routes.
 - Add a provider management endpoint so we can enable or disable payment providers without a reset. The way we have designed our application should make this easy to do.
