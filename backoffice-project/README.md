@@ -49,4 +49,4 @@ This is a very simple project, which hopefully has a solid enough design to be a
 - Introduce Event Emitters in our payment provider implementation, so we can listen for events to track the state of transactions and notify the important stakeholders in a decoupled manner.
 - Add a config database to hold important values, and further parameterize our way of adding routes and controllers so every controller dynamically mounts its routes.
 - Add a provider management endpoint so we can enable or disable payment providers without a reset. The way we have designed our application should make this easy to do.
-- And probably most important of all: Add testing!!!
+- Expand our very basic tests, and naturally add integration tests.
