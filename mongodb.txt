@@ -1,0 +1,332 @@
+** Ejercicio 1 **
+
+[
+  {
+    $match: // Query to get all the pokemon which have 1+ evolutions and no pre evolutions (or for example someone like Venusaur would appear twice).
+      /**
+       * query: The query in MQL.
+       */
+      {
+        $and: [
+          {
+            prev_evolution: {
+              $exists: false,
+            },
+          },
+          {
+            next_evolution: {
+              $exists: true,
+            },
+          },
+        ],
+      },
+  },
+  {
+    $unwind: // Unwind the next_evolution array to have one document for each evolution.
+      /**
+       * path: Path to the array field.
+       * includeArrayIndex: Optional name for index.
+       * preserveNullAndEmptyArrays: Optional
+       *   toggle to unwind null and empty values.
+       */
+      {
+        path: "$next_evolution",
+        includeArrayIndex: "string",
+      },
+  },
+  {
+    $lookup: // Join with the whole collection to get the data from each evolution.
+      /**
+       * from: The target collection.
+       * localField: The local join field.
+       * foreignField: The target join field.
+       * as: The name for the results.
+       * pipeline: Optional pipeline to run on the foreign collection.
+       * let: Optional variables to use in the pipeline field stages.
+       */
+      {
+        from: "samples_pokemon",
+        localField: "next_evolution.num",
+        foreignField: "num",
+        as: "evo",
+      },
+  },
+  {
+    $unwind: // Unwind the evolutions again.
+      /**
+       * path: Path to the array field.
+       * includeArrayIndex: Optional name for index.
+       * preserveNullAndEmptyArrays: Optional
+       *   toggle to unwind null and empty values.
+       */
+      {
+        path: "$evo",
+        includeArrayIndex: "string",
+      },
+  },
+  {
+    $project: // Finally project to get only the data we're interested in.
+      /**
+       * specifications: The fields to
+       *   include or exclude.
+       */
+      {
+        num: 1,
+        name: 1,
+        type: 1,
+        "evo.name": 1,
+        "evo.num": 1,
+        "evo.avg_spawns": 1,
+      },
+  },
+]
+
+** Ejercicio 2 **
+
+Resultado:
+[
+  {
+    $match: // We match every pokemon that is the first of their line (no prev evos and has a next evo)
+      /**
+       * query: The query in MQL.
+       */
+      {
+        $and: [
+          {
+            prev_evolution: {
+              $exists: false,
+            },
+          },
+          {
+            next_evolution: {
+              $exists: true,
+            },
+          },
+        ],
+      },
+  },
+  {
+    $unwind: // Unwind the next_evo array.
+      /**
+       * path: Path to the array field.
+       * includeArrayIndex: Optional name for index.
+       * preserveNullAndEmptyArrays: Optional
+       *   toggle to unwind null and empty values.
+       */
+      {
+        path: "$next_evolution",
+        includeArrayIndex: "string",
+      },
+  },
+  {
+    $group: // Since this includes first and second evolutions, we group them so we only get the first one.
+      /**
+       * _id: The id of the group.
+       * fieldN: The first field name.
+       */
+      {
+        _id: "$_id",
+        firstEvo: {
+          $first: "$next_evolution",
+        },
+      },
+  },
+  {
+    $lookup: // We look up the data of the first evo now.
+      /**
+       * from: The target collection.
+       * localField: The local join field.
+       * foreignField: The target join field.
+       * as: The name for the results.
+       * pipeline: Optional pipeline to run on the foreign collection.
+       * let: Optional variables to use in the pipeline field stages.
+       */
+      {
+        from: "samples_pokemon",
+        localField: "firstEvo.num",
+        foreignField: "num",
+        as: "firstEvo_data",
+      },
+  },
+  {
+    $unwind: // We unwind this data again.
+      /**
+       * path: Path to the array field.
+       * includeArrayIndex: Optional name for index.
+       * preserveNullAndEmptyArrays: Optional
+       *   toggle to unwind null and empty values.
+       */
+      {
+        path: "$firstEvo_data",
+      },
+  },
+  {
+    $replaceRoot: // We replace our root document with the data from the first evo, since we aren't interested in any data from the previous one.
+      /**
+       * replacementDocument: A document or string.
+       */
+      {
+        newRoot: "$firstEvo_data",
+      },
+  },
+  {
+    $match: // At this point we have pokemon that do not have a next evolution. We do a match stage so we only get Pokemon with another evolution afterwards.
+      /**
+       * query: The query in MQL.
+       */
+
+      {
+        next_evolution: {
+          $exists: true,
+        },
+      },
+  },
+  {
+    $lookup: // We look up the data of the next evolution.
+      /**
+       * from: The target collection.
+       * localField: The local join field.
+       * foreignField: The target join field.
+       * as: The name for the results.
+       * pipeline: Optional pipeline to run on the foreign collection.
+       * let: Optional variables to use in the pipeline field stages.
+       */
+      {
+        from: "samples_pokemon",
+        localField: "next_evolution.num",
+        foreignField: "num",
+        as: "last_evolution_data",
+      },
+  },
+  {
+    $unwind: // Unwinding the array again.
+      /**
+       * path: Path to the array field.
+       * includeArrayIndex: Optional name for index.
+       * preserveNullAndEmptyArrays: Optional
+       *   toggle to unwind null and empty values.
+       */
+      {
+        path: "$last_evolution_data",
+        includeArrayIndex: "string",
+      },
+  },
+  {
+    $match: // We match every one of these with an avg_spawn higher than 4. 
+      /**
+       * query: The query in MQL.
+       */
+      {
+        "last_evolution_data.avg_spawns": {
+          $gt: 4,
+        },
+      },
+  },
+  {
+    $project: // And finally we project only the data we want.
+      /**
+       * specifications: The fields to
+       *   include or exclude.
+       */
+      {
+        name: 1,
+        num: 1,
+      },
+  },
+]
+
+This aggregation can be improved somewhat using knowledge about our dataset. We know that:
+1) Not counting baby Pokemon, there is no Pokemon with an evolutionary line longer than 3.
+2) Baby Pokemon were introduced in Gen 2, and this database contains Pokemon from Gen 1 only.
+
+Knowing this, we do not need two lookup stages; rather, we can simply match every pokemon with a next_evolution and prev_evolution field. By necessity any pokemon that satisfies these two conditions is the first evolution in a 3 Pokemon evolutionary line, and therefore our aggregation becomes much more efficient. The result looks like this:
+
+[
+  {
+    $match: // Match every pokemon with a next and previous evo.
+      /**
+       * query: The query in MQL.
+       */
+      {
+        $and: [
+          {
+            next_evolution: {
+              $exists: true,
+            },
+          },
+          {
+            prev_evolution: {
+              $exists: true,
+            },
+          },
+        ],
+      },
+  },
+  {
+    $unwind: // Unwind the next evolution array.
+      /**
+       * path: Path to the array field.
+       * includeArrayIndex: Optional name for index.
+       * preserveNullAndEmptyArrays: Optional
+       *   toggle to unwind null and empty values.
+       */
+      {
+        path: "$next_evolution",
+        includeArrayIndex: "string",
+      },
+  },
+  {
+    $lookup: // Look up the data from the last evolution.
+      /**
+       * from: The target collection.
+       * localField: The local join field.
+       * foreignField: The target join field.
+       * as: The name for the results.
+       * pipeline: Optional pipeline to run on the foreign collection.
+       * let: Optional variables to use in the pipeline field stages.
+       */
+      {
+        from: "samples_pokemon",
+        localField: "next_evolution.num",
+        foreignField: "num",
+        as: "next_evolution_data",
+      },
+  },
+  {
+    $unwind: // Unwind this data again.
+      /**
+       * path: Path to the array field.
+       * includeArrayIndex: Optional name for index.
+       * preserveNullAndEmptyArrays: Optional
+       *   toggle to unwind null and empty values.
+       */
+      {
+        path: "$next_evolution_data",
+        includeArrayIndex: "string",
+      },
+  },
+  {
+    $match: // Check our condition: avg spawns higher than 4.
+      /**
+       * query: The query in MQL.
+       */
+      {
+        "next_evolution_data.avg_spawns": {
+          $gt: 4,
+        },
+      },
+  },
+  {
+    $project: // Project the data we need.
+      /**
+       * specifications: The fields to
+       *   include or exclude.
+       */
+      {
+        num: 1,
+        name: 1,
+      },
+  },
+]
+
+This aggregation only requires 6 stages (to the previous 11), and according to DBCompass Explain feature, executes in less than 10ms to the other aggregation's 30 to 40ms, which could become a big performance increase in larger databases. Of course, it is important to bear in mind this version would not work in a dataset with 4 Pokemon long evolutionary lines.
