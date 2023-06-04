@@ -1,11 +1,12 @@
 import express from 'express'
-import TestRoutes from './routes/TestRoutes'
+import PaymentRoutes from './routes/PaymentRoutes'
 import { logger } from './logger/winston';
 
 const app = express();
 const port = 5000;
 
-app.use('/api', TestRoutes);
+app.use(express.json())
+app.use('/api/payments', PaymentRoutes);
 
 app.get('/', (req, res) => {
     res.send('Express + TypeScript Server');
