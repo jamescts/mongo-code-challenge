@@ -18,4 +18,10 @@ The coding challenge can be found in the backoffice-project folder. To get it up
 npm i
 npm run dev
 ```
+
+To run unit tests:
+```bash
+npm test
+```
+
 There's also another Readme file that explains the decisions and the thought process behind the way the project is set up. 
